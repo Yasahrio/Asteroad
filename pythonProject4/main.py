@@ -52,16 +52,11 @@ for i in range(4):
     img = pygame.image.load(f'graphics/asteroid/asteroid1/{i}.png').convert_alpha()
     destruction_anim.append(img)
 
-progress_bar_empty = pygame.image.load('graphics/progress bar/bar.png').convert_alpha()
-progress_bar_fill =pygame.image.load('graphics/progress bar/icon.png').convert_alpha()
 
 # Button images
 start_img = pygame.image.load('graphics/buttons/start.png').convert_alpha()
 exit_img = pygame.image.load('graphics/buttons/exit.png').convert_alpha()
 
-#progressbar variables
-total_time = 186 #3 minutes and 6 seconds
-start_time = None
 
 class Ufo(pygame.sprite.Sprite):
     def __init__(self, x, y, speed):
@@ -88,6 +83,7 @@ class Ufo(pygame.sprite.Sprite):
         self.update_animation()
         if self.shoot_cooldown > 0:
             self.shoot_cooldown -= 2
+
 
     def move(self, moving_left, moving_right, moving_up, moving_down):
         dx = 0
@@ -206,15 +202,10 @@ asteroid_spawn_time = 100
 # Play menu sound effect
 menu_fx.play(-1)
 
-def draw_progress_bar(screen, x, y, width, height, progress):
-    # Draw the empty progress bar
-    screen.blit(progress_bar_empty, (x, y))
+# Define shaking variables
+shake_time = 0
+shake_intensity = 5
 
-    # Calculate the width of the filled portion
-    filled_width = int(progress * width)
-
-    # Draw the filled portion
-    screen.blit(progress_bar_fill, (x, y), (0, 0, filled_width, height))
 
 run = True
 # Inside the game loop
@@ -252,6 +243,7 @@ while run:
         if collisions_player:
             hit_fx.play()
             player.health -= 1
+            shake_time = 10  # Set shake time to create shaking effect
 
 
         player.draw()
@@ -279,17 +271,13 @@ while run:
         asteroid_group.draw(screen)
         bullet_group.draw(screen)
 
-        # Update the progress bar
-        if start_time is not None:
-            elapsed_time = (pygame.time.get_ticks() - start_time) / 1000
-            progress = elapsed_time / total_time
-            if progress > 1:
-                progress = 1
-                # Game ends when progress is complete, add your game end logic here
+        # Apply shaking effect to the screen
+        if shake_time > 0:
+            screen_shake = [random.randint(-shake_intensity, shake_intensity),
+                            random.randint(-shake_intensity, shake_intensity)]
+            screen.blit(screen, screen_shake)
+            shake_time -= 1
 
-            # Draw the progress bar at the top center of the screen
-            draw_progress_bar(screen, (screen_width - progress_bar_empty.get_width()) // 100, 1000,
-                              progress_bar_empty.get_width(), progress_bar_empty.get_height(), progress)
 
     # Player shooting
     if player.alive:
